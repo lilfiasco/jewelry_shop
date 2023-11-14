@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+</head>
+<body>
+    
+    <h1>Admin Dashboard</h1>
+
+    <a href="{{ url_for('create_product') }}">Create product</a>
+
+    <h3>Our products</h3>
+    {% for product in products %}
+
+        <h4>{{ product.name }}</h4>
+        <p>Material: {{ product.material }}</p>
+        <p>Price: {{ product.price }}</p>
+        <img src="{{ url_for('product_pictures', filename=product.image) }}" alt="Product Image" width="300">
+
+    {% endfor %}
+
+</body>
+</html>

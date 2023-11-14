@@ -1,9 +1,12 @@
+import os
+import time
 from flask import (
     Flask, 
     render_template, 
     url_for,
     redirect,
-    flash
+    flash,
+    send_from_directory,
 )
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -35,7 +38,7 @@ from flask_wtf.file import (
     FileAllowed, 
     FileRequired,
 )
-
+from werkzeug.utils import secure_filename
 from flask_bcrypt import Bcrypt
 from functools import wraps
 
@@ -44,6 +47,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secret_key_example'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'product_pictures'
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -211,7 +215,8 @@ def home():
 @app.route('/admin/dashboard')
 @admin_required
 def admin_dashboard():
-    return "Admin Dashboard"
+    products = Product.query.all()
+    return render_template('admin.html', products=products)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -264,6 +269,42 @@ def registration():
         else:
             flash('That email is already in use. Please choose a different one.', 'danger')
     return render_template('registration.html', form=form)
+
+
+@app.route('/product_pictures/<filename>')
+def product_pictures(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
+@app.route('/admin/dashboard/create_product', methods=['GET', 'POST'])
+@admin_required
+def create_product():
+    form = ProductForm()
+
+    if form.validate_on_submit():
+        image = form.image.data
+
+        # Regenerating pictures' names so they won't be replaced or rewrited 
+        filename = secure_filename(f"{str(int(time.time()))}_{image.filename}")
+
+        # Сохраняем изображение в папку 'product_pictures' вашего приложения
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        product = Product(
+            name=form.name.data,
+            material=form.material.data,
+            price=form.price.data,
+            image=filename,  # Path to current picture
+            jewelry_type_id=form.jewelry_type_id.data
+        )
+
+        db.session.add(product)
+        db.session.commit()
+
+        flash('Product created successfully!', 'success')
+        return redirect(url_for('home'))
+
+    return render_template('create_product.html', form=form)
 
 
 if __name__ == "__main__":
