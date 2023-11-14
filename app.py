@@ -7,7 +7,7 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
-    UserMixin, 
+    UserMixin,
     LoginManager,
     login_user, 
     logout_user,
@@ -20,41 +20,49 @@ from wtforms import (
     SelectField,
     PasswordField, 
     SubmitField,
+    FileField,
+    IntegerField,
 )
 from wtforms.validators import (
     ValidationError,
     InputRequired, 
     Length, 
     EqualTo,
-    Email
+    Email,
+    NumberRange,
 )
+from flask_wtf.file import (
+    FileAllowed, 
+    FileRequired,
+)
+
 from flask_bcrypt import Bcrypt
 from functools import wraps
-bcrypt = Bcrypt()
 
 
 app = Flask(__name__)
-db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'secret_key_example'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
 
+def init_app(app):
+    db.init_app(app)
+    bcrypt.init_app(app)
+    login_manager.init_app(app)
+
+init_app(app)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-def admin_required(func):
-    @wraps(func)
-    def decorated_view(*args, **kwargs):
-        if current_user.is_authenticated and current_user.role == 'admin':
-            return func(*args, **kwargs)
-        else:
-            return "Permission denied", 403  
-    return decorated_view
 
 
 class User(db.Model, UserMixin):
@@ -81,6 +89,41 @@ class Product(db.Model):
     image = db.Column(db.String(255), nullable=True)  
     jewelry_type_id = db.Column(db.Integer, db.ForeignKey('jewelry_type.id'), nullable=False)
     jewelry_type = db.relationship('JewelryType', backref=db.backref('products', lazy=True))
+
+
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+
+    def __init__(self, user_id, product_id, quantity=1):
+        self.user_id = user_id
+        self.product_id = product_id
+        self.quantity = quantity
+
+    def update_quantity(self, quantity):
+        self.quantity += quantity
+        db.session.commit()
+
+    def saveToDB(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def deleteFromDB(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+
+def admin_required(func):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if current_user.is_authenticated and current_user.role == 'admin':
+            return func(*args, **kwargs)
+        else:
+            return "Permission denied", 403  
+    return decorated_view
 
 
 class RegistrationForm(FlaskForm):
@@ -148,6 +191,23 @@ class LogoutForm(FlaskForm):
     submit = SubmitField('Logout')
 
 
+class ProductForm(FlaskForm):
+    name = StringField('Name', validators=[InputRequired(), Length(max=100)])
+    material = StringField('Material', validators=[InputRequired(), Length(max=50)])
+    price = IntegerField('Price', validators=[InputRequired(), NumberRange(min=0)])
+    image = FileField('Image', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
+    jewelry_type_id = SelectField('Jewelry Type', coerce=int, validators=[InputRequired()])
+
+    def __init__(self, *args, **kwargs):
+        super(ProductForm, self).__init__(*args, **kwargs)
+        self.jewelry_type_id.choices = [(jewelry_type.id, jewelry_type.name) for jewelry_type in JewelryType.query.all()]
+
+
+@app.route('/', endpoint='home')
+def home():
+    return render_template('home.html')
+
+
 @app.route('/admin/dashboard')
 @admin_required
 def admin_dashboard():
@@ -182,7 +242,7 @@ def registration():
     if form.validate_on_submit():
         try:
             # Serching if user with such email exists
-            existing_user = User.query.filter_by(username=form.username.data).first()
+            existing_user = User.query.filter_by(email=form.email.data).first()
             if existing_user is None:
                 # If user doesn't exist, creating a new one with current data
                 hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -198,11 +258,11 @@ def registration():
                 # Starting new user's session
                 login_user(new_user)
                 flash('Your account has been created!', 'success')
-                return redirect(url_for('home'))
+                return redirect(url_for('home')) or redirect('/')
         except:
             flash('An error occurred while registering your account.', 'danger')
         else:
-            flash('That username already exists. Please choose a different one.', 'danger')
+            flash('That email is already in use. Please choose a different one.', 'danger')
     return render_template('registration.html', form=form)
 
 
