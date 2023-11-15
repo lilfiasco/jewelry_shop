@@ -7,6 +7,7 @@ from flask import (
     redirect,
     flash,
     send_from_directory,
+    request,
 )
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -26,6 +27,7 @@ from wtforms import (
     FileField,
     IntegerField,
 )
+from flask_migrate import Migrate
 from wtforms.validators import (
     ValidationError,
     InputRequired, 
@@ -50,6 +52,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'product_pictures'
 
 db = SQLAlchemy()
+migrate = Migrate(app, db)
 bcrypt = Bcrypt()
 
 login_manager = LoginManager(app)
@@ -94,11 +97,16 @@ class Product(db.Model):
     jewelry_type_id = db.Column(db.Integer, db.ForeignKey('jewelry_type.id'), nullable=False)
     jewelry_type = db.relationship('JewelryType', backref=db.backref('products', lazy=True))
 
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product = db.relationship('Product', backref=db.backref('carts', lazy=True))
     quantity = db.Column(db.Integer, default=1)
 
     def __init__(self, user_id, product_id, quantity=1):
@@ -117,7 +125,6 @@ class Cart(db.Model):
     def deleteFromDB(self):
         db.session.delete(self)
         db.session.commit()
-
 
 
 def admin_required(func):
@@ -199,7 +206,7 @@ class ProductForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired(), Length(max=100)])
     material = StringField('Material', validators=[InputRequired(), Length(max=50)])
     price = IntegerField('Price', validators=[InputRequired(), NumberRange(min=0)])
-    image = FileField('Image', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
+    image = FileField('Image', validators=[])
     jewelry_type_id = SelectField('Jewelry Type', coerce=int, validators=[InputRequired()])
 
     def __init__(self, *args, **kwargs):
@@ -209,7 +216,8 @@ class ProductForm(FlaskForm):
 
 @app.route('/', endpoint='home')
 def home():
-    return render_template('home.html')
+    products = Product.query.all()
+    return render_template('home.html', products=products)
 
 
 @app.route('/admin/dashboard')
@@ -305,6 +313,85 @@ def create_product():
         return redirect(url_for('home'))
 
     return render_template('create_product.html', form=form)
+
+
+@app.route('/admin/dashboard/edit_product/<int:product_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_product(product_id):
+    product = Product.query.get_or_404(product_id)
+    form = ProductForm(obj=product)
+
+    if form.validate_on_submit():
+        if form.image.data:
+            image = form.image.data
+            filename = secure_filename(f"{str(int(time.time()))}_{image.filename}")
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            product.image = filename
+
+        product.name = form.name.data
+        product.material = form.material.data
+        product.price = form.price.data
+        product.jewelry_type_id = form.jewelry_type_id.data
+
+        db.session.commit()
+
+        flash('Product updated successfully!', 'success')
+        return redirect(url_for('home'))
+
+    return render_template('edit_product.html', form=form, product=product)
+
+
+@app.route('/admin/dashboard/delete_product/<int:product_id>', methods=['POST'])
+@admin_required
+def delete_product(product_id):
+    product = Product.query.get_or_404(product_id)
+    product.delete()
+    flash('Product deleted successfully!', 'success')
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/product/<int:product_id>')
+def product_detail(product_id):
+    product = Product.query.get_or_404(product_id)
+    return render_template('product_detail.html', product=product)
+
+
+@app.route('/add_to_cart/<int:product_id>', methods=['POST'])
+@login_required
+def add_to_cart(product_id):
+    product = Product.query.get_or_404(product_id)
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product.id).first()
+
+    if cart_item:
+        cart_item.update_quantity(1)
+    else:
+        cart_item = Cart(user_id=current_user.id, product_id=product.id)
+        cart_item.saveToDB()
+
+    flash('Product added to cart successfully!', 'success')
+    return redirect(url_for('product_detail', product_id=product_id))
+
+
+@app.route('/remove_from_cart/<int:cart_item_id>', methods=['POST'])
+@login_required
+def remove_from_cart(cart_item_id):
+    cart_item = Cart.query.get_or_404(cart_item_id)
+
+    if cart_item.user_id == current_user.id:
+        cart_item.deleteFromDB()
+        flash('Product removed from cart successfully!', 'success')
+    else:
+        flash('You do not have permission to remove this product from the cart.', 'danger')
+
+    return redirect(url_for('cart'))
+
+
+@app.route('/cart')
+@login_required
+def cart():
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+
+    return render_template('cart.html', cart_items=cart_items)
 
 
 if __name__ == "__main__":

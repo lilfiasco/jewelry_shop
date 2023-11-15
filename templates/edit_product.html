@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit</title>
+</head>
+<body>
+    
+    <h1>Edit Product</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div>
+          <label for="name">Name:</label>
+          {{ form.name }}
+        </div>
+        <div>
+          <label for="material">Material:</label>
+          {{ form.material }}
+        </div>
+        <div>
+          <label for="price">Price:</label>
+          {{ form.price }}
+        </div>
+        <div>
+          <label for="image">Image:</label>
+          {{ form.image }}
+        </div>
+        <div>
+          <label for="jewelry_type_id">Jewelry Type:</label>
+          {{ form.jewelry_type_id }}
+        </div>
+        <div>
+          <button type="submit">Save Changes</button>
+        </div>
+      </form>
+
+</body>
+</html>

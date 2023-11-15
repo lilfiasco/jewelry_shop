@@ -39,6 +39,9 @@
 
                 {% if current_user.is_authenticated %}
                     <li class="nav-link">
+                        <a href="{{ url_for('cart') }}">Cart</a>
+                    </li>
+                    <li class="nav-link">
                         Online: {{ current_user.email }}
                     </li>
                 {% endif %}
@@ -49,8 +52,10 @@
 
     <h2>Test Homepage</h2>
     
-    <p><a href="{{ url_for('login') }}">Login</a><br></p>
-    <p><a href="{{ url_for('registration') }}">Register</a></p>
+    {% if current_user.is_anonymous %}
+        <p><a href="{{ url_for('login') }}">Login</a><br></p>
+        <p><a href="{{ url_for('registration') }}">Register</a></p>
+    {% endif %}
 
     {% if current_user.is_authenticated %}
         
@@ -62,6 +67,18 @@
         {% endif %}
 
     {% endif %}
+
+
+    <h3>Our products</h3>
+    {% for product in products %}
+
+        <h4>{{ product.name }}</h4> 
+        <p>Price: {{ product.price }}</p>
+        <img src="{{ url_for('product_pictures', filename=product.image) }}" alt="Product Image" width="200">
+        <p><a href="{{ url_for('product_detail', product_id=product.id) }}">Details</a></p>
+        
+
+    {% endfor %}
 
 </body>
 

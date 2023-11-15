@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} Details</title>
+</head>
+<body>
+
+    <h1>{{ product.name }} Details</h1>
+    <p>Material: {{ product.material }}</p>
+    <p>Jewelry Type: {{ product.jewelry_type.name }}</p>
+    <p>Price: {{ product.price }}</p>
+
+    <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
+        <input type="submit" value="Add to Cart">
+    </form>
+    
+    <img src="{{ url_for('product_pictures', filename=product.image) }}" alt="Product Image" width="600">
+
+</body>
+</html>
