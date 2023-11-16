@@ -42,6 +42,9 @@
                         <a href="{{ url_for('cart') }}">Cart</a>
                     </li>
                     <li class="nav-link">
+                        <a href="{{ url_for('wishlist') }}">Wishlist</a>
+                    </li>
+                    <li class="nav-link">
                         Online: {{ current_user.email }}
                     </li>
                 {% endif %}

@@ -127,6 +127,25 @@ class Cart(db.Model):
         db.session.commit()
 
 
+class Wishlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product = db.relationship('Product', backref=db.backref('wishlists', lazy=True))
+
+    def __init__(self, user_id, product_id):
+        self.user_id = user_id
+        self.product_id = product_id
+
+    def saveToDB(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def deleteFromDB(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
 def admin_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
@@ -217,7 +236,8 @@ class ProductForm(FlaskForm):
 @app.route('/', endpoint='home')
 def home():
     products = Product.query.all()
-    return render_template('home.html', products=products)
+    form = LogoutForm()
+    return render_template('home.html', products=products, form=form)
 
 
 @app.route('/admin/dashboard')
@@ -386,12 +406,50 @@ def remove_from_cart(cart_item_id):
     return redirect(url_for('cart'))
 
 
+@app.route('/add_to_wishlist/<int:product_id>', methods=['POST'])
+@login_required
+def add_to_wishlist(product_id):
+    product = Product.query.get_or_404(product_id)
+    wishlist_item = Wishlist.query.filter_by(user_id=current_user.id, product_id=product.id).first()
+
+    if wishlist_item:
+        flash('Product is already in your wishlist.', 'warning')
+    else:
+        wishlist_item = Wishlist(user_id=current_user.id, product_id=product.id)
+        wishlist_item.saveToDB()
+        flash('Product added to wishlist successfully!', 'success')
+
+    return redirect(url_for('product_detail', product_id=product_id))
+
+
+@app.route('/remove_from_wishlist/<int:wishlist_item_id>', methods=['POST'])
+@login_required
+def remove_from_wishlist(wishlist_item_id):
+    wishlist_item = Wishlist.query.get_or_404(wishlist_item_id)
+
+    if wishlist_item.user_id == current_user.id:
+        wishlist_item.deleteFromDB()
+        flash('Product removed from wishlist successfully!', 'success')
+    else:
+        flash('You do not have permission to remove this product from the wishlist.', 'danger')
+
+    return redirect(url_for('wishlist'))
+
+
 @app.route('/cart')
 @login_required
 def cart():
     cart_items = Cart.query.filter_by(user_id=current_user.id).all()
 
     return render_template('cart.html', cart_items=cart_items)
+
+
+@app.route('/wishlist')
+@login_required
+def wishlist():
+    wishlist_items = Wishlist.query.filter_by(user_id=current_user.id).all()
+
+    return render_template('wishlist.html', wishlist_items=wishlist_items)
 
 
 if __name__ == "__main__":

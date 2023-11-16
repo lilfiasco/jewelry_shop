@@ -15,6 +15,9 @@
     <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
         <input type="submit" value="Add to Cart">
     </form>
+    <form method="POST" action="{{ url_for('add_to_wishlist', product_id=product.id) }}">
+        <input type="submit" value="Add to Wishlist">
+    </form>
     
     <img src="{{ url_for('product_pictures', filename=product.image) }}" alt="Product Image" width="600">
 

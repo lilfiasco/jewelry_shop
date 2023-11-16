@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+</head>
+<body>
+    
+    <h2>Your Wishlist</h2>
+
+    {% if wishlist_items %}
+        <ul>
+        {% for item in wishlist_items %}
+            <li>{{ item.product.name }} - {{ item.product.price }}₸</li>
+            <img src="{{ url_for('product_pictures', filename=item.product.image) }}" alt="Product Image" width="200">
+            <form method="POST" action="{{ url_for('remove_from_wishlist', wishlist_item_id=item.id) }}">
+                <input type="submit" value="Remove">
+            </form>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+
+</body>
+</html>
