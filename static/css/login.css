@@ -1,0 +1,76 @@
+.login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 200px;
+}
+
+.login-title {
+    font-family: 'M+ 1p', Arial, -apple-system-body, sans-serif;
+    font-size: 30px;
+}
+
+.login-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+input[type="text"],
+input[type="password"] {
+    border: 1px solid white;
+    background-color: white;
+    width: 200px;
+    height: 20px;
+    color: rgb(255, 129, 196);
+    font-size: 15px;
+    border-color: white; 
+    margin: 0px;
+}
+
+input[type="submit"] {
+    border: 1px solid white;
+    background-color: white;
+    width: 200px;
+    height: 47px;
+    color: rgb(255, 129, 196);
+    font-size: 15px;
+    font-family: 'M+ 1p', Arial, -apple-system-body, sans-serif;
+}
+
+input[type="submit"]:hover {
+    background-color: rgb(255, 129, 196);
+    color: white;
+}
+
+.button-reg {
+    color: rgb(255, 129, 196);
+    border: 1px solid white;
+    background-color: white;
+    width: 400px;
+    height: 47px;
+    text-align: center;
+}
+
+.button-reg-title {
+    text-decoration: none;
+    color: rgb(255, 129, 196);
+    font-family: 'M+ 1p', Arial, -apple-system-body, sans-serif;
+    font-size: 15px;
+}
+
+.line-login {
+    color: #ccc;
+}
+
+input[type="text"],
+input[type="password"]:focus {
+    outline: 0;
+    outline-offset: 0;
+}
+
+.line-auth {
+    width: 1000px;
+}

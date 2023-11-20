@@ -1,0 +1,99 @@
+.navbar {
+    background-color: white;
+    position: fixed;
+    padding: 20px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.navbar-admin {
+    color: black;
+    text-decoration: none;
+    font-size: 18px;
+    font-family: 'M+ 1p', Arial, -apple-system-body, sans-serif; 
+}
+
+.navbar-brand {
+    color: rgb(55, 55, 55);
+    font-size: 30px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.navbar-item {
+    display: flex;
+    flex-direction: row;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 10px;
+}
+
+.icon-navbar {
+    color: rgb(255, 129, 196);
+    font-size: 20px; 
+}
+
+.icon-navbar i {
+    padding-left: 60px;
+}
+
+.btn-navbar {
+    color: rgb(255, 129, 196);
+    font-size: 20px; 
+    padding-left: 60px;
+    border: none;
+    background-color: white;
+}
+
+.btn-navbar:hover {
+    text-decoration: none;
+}
+
+.reg-nav {
+    background-color: rgb(255, 129, 196);
+    border-radius: 2rem;
+    font-size: 20px;
+    border-color: white; 
+}
+
+.reg-nav-title {
+    color: white;
+    padding: 20px 20px;
+    font-family: 'M+ 1p', Arial, -apple-system-body, sans-serif;
+}
+
+.reg-nav-title:hover {
+    text-decoration: none;
+    color: white;
+}
+
+.auth-nav {
+    background-color: white;
+    font-size: 20px;
+    border-color: white; 
+    border: none; 
+}
+
+
+.auth-nav-title {
+    color: rgb(255, 129, 196);
+    padding: 20px 20px;
+    font-family: 'M+ 1p', Arial, -apple-system-body, sans-serif;
+}
+
+.auth-nav-title:hover {
+    text-decoration: none;
+    color: rgb(255, 129, 196);
+}
+
+.icon-li {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}

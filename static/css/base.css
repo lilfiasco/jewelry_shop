@@ -1,0 +1,14 @@
+body {
+    background-color: #ffffff78;
+}
+a {
+    text-decoration: none;
+}
+
+html, body {
+    scroll-behavior: smooth;
+}
+
+li {
+    list-style-type: none;
+}

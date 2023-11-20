@@ -4,19 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="../static/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    
-    <h1>Login Page</h1>
-
-    <form method="POST" action="">
-        <p>{{ form.hidden_tag() }}</p>
-        <p>{{ form.email }}</p>
-        <p>{{ form.password }}</p>
-        <p>{{ form.submit }}</p>
-    </form>
-
-    <a href="{{ url_for('registration') }}">Don't have an account? Sign Up</a>
-
+    <section class="login">
+        <hr class="line-auth">
+        <h1 class="login-title">Authorization</h1>
+        <div class="login-main">
+            <form method="POST" action="" >
+                <p>{{ form.hidden_tag() }}</p>
+                <p>
+                    {{ form.email }}
+                </p>
+                <hr class="line-login">
+                <p>
+                    {{ form.password }}
+                </p>
+                <hr class="line-login">
+                <p>{{ form.submit }}</p>
+            </form>
+        </div>
+        <button class="button-reg"><a href="{{ url_for('registration') }}" class="button-reg-title">Don't have an account? Sign Up</a></button>
+        <hr class="line-auth">
+    </section>
 </body>
 </html>

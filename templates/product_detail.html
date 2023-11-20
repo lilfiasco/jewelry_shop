@@ -4,22 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.name }} Details</title>
+    <link rel="stylesheet" href="../static/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
 </head>
 <body>
+    <nav class="navbar">
+        <a class="navbar-brand" href="{{ url_for('home') }}">KazJewelry</a>
+        
+        <div id="navbarSupportedContent">
+            <ul class="navbar-item">
+                {% if current_user.role == 'admin' %}
+                    <li class="nav-link">
+                        <a class="navbar-admin" href="{{ url_for('admin_dashboard') }}">Admin</a><br>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
 
-    <h1>{{ product.name }} Details</h1>
-    <p>Material: {{ product.material }}</p>
-    <p>Jewelry Type: {{ product.jewelry_type.name }}</p>
-    <p>Price: {{ product.price }}</p>
+        {% if current_user.is_authenticated %}
+        <div class="icon-li">
+            <a href="{{ url_for('wishlist') }}" class="icon-navbar"><i class="fa-solid fa-heart"></i></a>
+            <a href="{{ url_for('cart') }}" class="icon-navbar"><i class="fa-solid fa-cart-shopping"></i></a>
+            <a href="{{ url_for('logout') }}" class="icon-navbar"><i class="fa-solid fa-right-to-bracket"></i></a>
+        </div>
+        {% else %}
+        <div>
+            {% if current_user.is_anonymous %}
+                <button class="auth-nav"><a href="{{ url_for('login') }}" class="auth-nav-title">Login</a></button>
+                <button class="reg-nav"><a href="{{ url_for('registration') }}" class="reg-nav-title">Register</a></button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </nav>
 
-    <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
-        <input type="submit" value="Add to Cart">
-    </form>
-    <form method="POST" action="{{ url_for('add_to_wishlist', product_id=product.id) }}">
-        <input type="submit" value="Add to Wishlist">
-    </form>
-    
-    <img src="{{ url_for('product_pictures', filename=product.image) }}" alt="Product Image" width="600">
+    <section class="product-details">
+        <div class="card-product">
+            <h1 class="catalog-title">{{ product.name }} Details</h1>
+            <hr class="line-details">
+            <img src="{{ url_for('product_pictures', filename=product.image) }}" alt="Product Image" width="300">
+            <hr class="line-details">
+            <div class="product-item">
+                <p>Material: {{ product.material }}</p>
+                <p>Jewelry Type: {{ product.jewelry_type.name }}</p>
+                <p>Price: {{ product.price }}</p>
+            </div>
+
+            
+            <div class="button-product">
+                <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
+                    <input type="submit" value="Add to Cart">
+                </form>
+                <form method="POST" action="{{ url_for('add_to_wishlist', product_id=product.id) }}">
+                    <input type="submit" value="Add to Wishlist">
+                </form>
+            </div>
+        </div>
+        
+    </section>
 
 </body>
 </html>

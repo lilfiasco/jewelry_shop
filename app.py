@@ -217,10 +217,6 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-class LogoutForm(FlaskForm):
-    submit = SubmitField('Logout')
-
-
 class ProductForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired(), Length(max=100)])
     material = StringField('Material', validators=[InputRequired(), Length(max=50)])
@@ -236,8 +232,7 @@ class ProductForm(FlaskForm):
 @app.route('/', endpoint='home')
 def home():
     products = Product.query.all()
-    form = LogoutForm()
-    return render_template('home.html', products=products, form=form)
+    return render_template('home.html', products=products)
 
 
 @app.route('/admin/dashboard')
@@ -261,13 +256,11 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/logout', methods=['POST'])
+@app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.', 'success')
     return redirect(url_for('home'))
-
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():

@@ -4,23 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
+    <link rel="stylesheet" href="../static/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
+    <section class="registration">
+        <hr class="line-auth">
+        <h1 class="login-title">Registration</h1>
+        <div class="login-main">
+            <form method="POST" action="" >
+                <p>{{ form.hidden_tag() }}</p>
+                <p>
+                    {{ form.first_name }}
+                </p>
+                <hr class="line-login">
+                <p>
+                    {{ form.last_name }}
+                </p>
+                <hr class="line-login">
+                <p>{{ form.email }}</p>
+                <hr class="line-login">
+                <p>{{ form.role }}</p>
+                <hr class="line-login">
+                <p>{{ form.password }}</p>
+                <hr class="line-login">
+                <p>{{ form.confirm_password }}</p>
+                <hr class="line-login">
+                <p>{{ form.submit }}</p>
+            </form>
+        </div>
+        <button class="button-reg"><a href="{{ url_for('login') }}" class="button-reg-title">Already have an account? Log In</a></button>
+        <hr class="line-auth">
+    </section>
     
-     <h1>Register Page</h1>
-    
-    <form method="POST" action="">
-        <p>{{ form.hidden_tag() }}</p>
-        <p>{{ form.first_name }}</p>
-        <p>{{ form.last_name }}</p>
-        <p>{{ form.email }}</p>
-        <p>{{ form.role }}</p>
-        <p>{{ form.password }}</p>
-        <p>{{ form.confirm_password }}</p>
-        <p>{{ form.submit }}</p>
-    </form>
-
-     <a href="{{ url_for('login') }}">Already have an account? Log In</a>
 
 </body>
 </html>

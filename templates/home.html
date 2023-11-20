@@ -7,82 +7,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>Home</title>
+    <link rel="stylesheet" href="../static/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">KazJewelry</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-      
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('home') }}">Home <span class="sr-only">(current)</span></a>
-                </li>
-                {% if current_user.is_anonymous %}
-                    <li class="nav-link">
-                        <a href="{{ url_for('login') }}">Login</a><br>
-                    </li>
-                    <li class="nav-link">
-                        <a href="{{ url_for('registration') }}">Register</a>
-                    </li>
-                {% endif %}
+    <nav class="navbar">
+        <a class="navbar-brand" href="{{ url_for('home') }}">KazJewelry</a>
+        
+          <div id="navbarSupportedContent">
+              <ul class="navbar-item">
+                  {% if current_user.role == 'admin' %}
+                      <li class="nav-link">
+                          <a class="navbar-admin" href="{{ url_for('admin_dashboard') }}">Admin</a><br>
+                      </li>
+                  {% endif %}
+              </ul>
+            </div>
 
-                {% if current_user.role == 'admin' %}
-                    <li class="nav-link">
-                        <a href="{{ url_for('admin_dashboard') }}">Admin</a><br>
-                    </li>
-                {% endif %}
-
-                {% if current_user.is_authenticated %}
-                    <li class="nav-link">
-                        <a href="{{ url_for('cart') }}">Cart</a>
-                    </li>
-                    <li class="nav-link">
-                        <a href="{{ url_for('wishlist') }}">Wishlist</a>
-                    </li>
-                    <li class="nav-link">
-                        Online: {{ current_user.email }}
-                    </li>
-                {% endif %}
-            </ul>
-          
+        {% if current_user.is_authenticated %}
+        <div class="icon-li">
+            <a href="{{ url_for('wishlist') }}" class="icon-navbar"><i class="fa-solid fa-heart"></i></a>
+            <a href="{{ url_for('cart') }}" class="icon-navbar"><i class="fa-solid fa-cart-shopping"></i></a>
+            <a href="{{ url_for('logout') }}" class="icon-navbar"><i class="fa-solid fa-right-to-bracket"></i></a>
         </div>
+        {% else %}
+        <div>
+            {% if current_user.is_anonymous %}
+                <button class="auth-nav"><a href="{{ url_for('login') }}" class="auth-nav-title">Login</a></button>
+                <button class="reg-nav"><a href="{{ url_for('registration') }}" class="reg-nav-title">Register</a></button>
+            {% endif %}
+        </div>
+        {% endif %}
     </nav>
 
-    <h2>Test Homepage</h2>
-    
-    {% if current_user.is_anonymous %}
-        <p><a href="{{ url_for('login') }}">Login</a><br></p>
-        <p><a href="{{ url_for('registration') }}">Register</a></p>
-    {% endif %}
-
-    {% if current_user.is_authenticated %}
-        
-        {% if form %}
-            <form method="post" action="{{ url_for('logout') }}">
-                {{ form.hidden_tag() }}
-                <button type="submit">Logout, bye {{current_user.first_name}} </button>
-            </form>
-        {% endif %}
-
-    {% endif %}
-
-
-    <h3>Our products</h3>
-    {% for product in products %}
-
-        <h4>{{ product.name }}</h4> 
-        <p>Price: {{ product.price }}</p>
-        <img src="{{ url_for('product_pictures', filename=product.image) }}" alt="Product Image" width="200">
-        <p><a href="{{ url_for('product_detail', product_id=product.id) }}">Details</a></p>
-        
-
-    {% endfor %}
+    <section class="catalog">
+        <h3 class="catalog-title">Our products</h3>
+        <hr class="line-auth">
+        <div class="row">
+            {% for product in products %}
+            <div class="col-12 col-md-3 col-sm-6">
+                <div class="catalog-main">
+                    <div class="catalog-card">
+                        <p class="catalog-card-title">{{ product.name }}</p> 
+                        <img src="{{ url_for('product_pictures', filename=product.image) }}" alt="Product Image" class="image-catalog">
+                        <div class="catalog-card-details">
+                            <p>Price: {{ product.price }}</p>
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="icon-catalog"><i class="fas fa-info-circle"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>    
 
 </body>
-
 </html>

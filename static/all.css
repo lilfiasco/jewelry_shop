@@ -1,0 +1,13 @@
+@import url("css/base.css");
+@import url("css/navbar.css");
+@import url("css/login.css");
+@import url("css/registration.css");
+@import url("css/catalog.css");
+@import url("css/product-details.css");
+@import url("css/cart.css");
+@import url("css/whishlist.css");
+@import url("css/admindashboard.css");
+@import url("css/edit.css");
+@import url("css/createproduct.css");
+
+@import url('https://fonts.cdnfonts.com/css/jost-3');

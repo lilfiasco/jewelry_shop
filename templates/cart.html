@@ -4,24 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
+    <link rel="stylesheet" href="../static/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
+    <nav class="navbar">
+        <a class="navbar-brand" href="{{ url_for('home') }}">KazJewelry</a>
+        
+        <div id="navbarSupportedContent">
+            <ul class="navbar-item">
+                {% if current_user.role == 'admin' %}
+                    <li class="nav-link">
+                        <a class="navbar-admin" href="{{ url_for('admin_dashboard') }}">Admin</a><br>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <div class="icon-li">
+            <a href="{{ url_for('wishlist') }}" class="icon-navbar"><i class="fa-solid fa-heart"></i></a>
+            <a href="{{ url_for('cart') }}" class="icon-navbar"><i class="fa-solid fa-cart-shopping"></i></a>
+            <a href="{{ url_for('logout') }}" class="icon-navbar"><i class="fa-solid fa-right-to-bracket"></i></a>
+        </div>
+        {% else %}
+        <div>
+            {% if current_user.is_anonymous %}
+                <button class="auth-nav"><a href="{{ url_for('login') }}" class="auth-nav-title">Login</a></button>
+                <button class="reg-nav"><a href="{{ url_for('registration') }}" class="reg-nav-title">Register</a></button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </nav>
     
-    <h2>Your Shopping Cart</h2>
+    <section class="cart-main">
+        <div class="cart">
+            {% if cart_items %}
+            <ul id="cart-list" class="cart-list">
+            {% for item in cart_items %}
+                <li class="cart-list-li">
+                    <div>
+                        <img src="{{ url_for('product_pictures', filename=item.product.image) }}" alt="Product Image" width="200" height="200px" class="image-cart">
+                    </div>
+                    <div class="item-cart-details">
+                        <p class="cart-detail-title">{{ item.product.name }}</p>
+                        <div class="quantity-control">
+                            <button class="quantity-btn" onclick="updateQuantity('{{ item.id }}', -1)">-</button>
+                            <span class="quantity" id="quantity_{{ item.id }}">{{ item.quantity }}</span>
+                            <button class="quantity-btn" onclick="updateQuantity('{{ item.id }}', 1)">+</button>
+                        </div>
+                        <p class="cart-detail-title">Price: <span class="item-price" id="price_{{ item.id }}">{{ item.product.price * item.quantity }}₸</span></p>
+                        <form method="POST" action="{{ url_for('remove_from_cart', cart_item_id=item.id) }}">
+                            <button href="" class="btn-navbar" type="submit" value="Remove"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+        <div id="cart-summary" class='cart-pay'>
+            <p class="total-title">Total Items: <span id="total-items" class="span-total"></span></p>
+            <p class="total-title"><i class="fa-solid fa-money-bill"></i>:<span id="total-price" class="span-total"></span>₸</p>
+            <button onclick="openModal()" class="pay-btn">Pay Now</button>
+        </div>
+        {% else %}
+        <p class="empty-cart">Your cart is empty.</p>
+        {% endif %}
+    </section>
 
-    {% if cart_items %}
-        <ul>
-        {% for item in cart_items %}
-            <li>{{ item.product.name }} - Quantity: {{ item.quantity }} - {{ item.product.price * item.quantity }}₸</li>
-            <img src="{{ url_for('product_pictures', filename=item.product.image) }}" alt="Product Image" width="200">
-            <form method="POST" action="{{ url_for('remove_from_cart', cart_item_id=item.id) }}">
-                <input type="submit" value="Remove">
-            </form>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>Your cart is empty.</p>
-    {% endif %}
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2>Order Summary</h2>
+            <ul id="order-summary-list">
+                <!-- Order summary details will be added dynamically through JavaScript -->
+            </ul>
+            <p>Total Price: <span id="modal-total-price"></span>₸</p>
+            <button onclick="processPayment()">Process Payment</button>
+        </div>
+    </div>
 
+    <script>
+        function updateQuantity(cartItemId, change) {
+            var quantityElement = document.getElementById("quantity_" + cartItemId);
+            var priceElement = document.getElementById("price_" + cartItemId);
+    
+            var currentQuantity = parseInt(quantityElement.textContent);
+            var newQuantity = currentQuantity + change;
+    
+            if (newQuantity < 1) {
+                newQuantity = 1; // Ensure quantity doesn't go below 1
+            }
+    
+            quantityElement.textContent = newQuantity;
+    
+            // Update total price for the item
+            var itemPrice = parseFloat(priceElement.textContent.replace('₸', '')) / currentQuantity;
+            var newPrice = itemPrice * newQuantity;
+            priceElement.textContent = newPrice.toFixed(2) + "₸";
+    
+            // Update the total items and total price
+            updateCartSummary();
+        }
+    
+        function updateCartSummary() {
+            var totalItems = 0;
+            var totalPrice = 0;
+    
+            var cartItems = document.querySelectorAll(".cart-list-li");
+    
+            cartItems.forEach(function(item) {
+                var quantity = parseInt(item.querySelector(".quantity").textContent);
+                var price = parseFloat(item.querySelector(".item-price").textContent.replace('₸', ''));
+    
+                totalItems += quantity;
+                totalPrice += price;
+            });
+    
+            document.getElementById("total-items").textContent = totalItems;
+            document.getElementById("total-price").textContent = totalPrice.toFixed(2);
+        }
+    </script>
+
+<script>
+    function openModal() {
+        var modal = document.getElementById('orderModal');
+        modal.style.display = 'flex';
+
+        // Populate the order summary details
+        var orderSummaryList = document.getElementById('order-summary-list');
+        orderSummaryList.innerHTML = ""; // Clear existing content
+
+        var cartItems = document.querySelectorAll(".cart-list-li");
+
+        cartItems.forEach(function(item) {
+            var itemName = item.querySelector(".cart-detail-title").textContent;
+            var itemQuantity = item.querySelector(".quantity").textContent;
+            var itemPrice = item.querySelector(".item-price").textContent;
+
+            var listItem = document.createElement("li");
+            listItem.textContent = `${itemName} - Quantity: ${itemQuantity} - ${itemPrice}`;
+            orderSummaryList.appendChild(listItem);
+        });
+
+        // Populate the total price in the modal
+        var modalTotalPrice = document.getElementById('modal-total-price');
+        var totalPrice = document.getElementById('total-price').textContent;
+        modalTotalPrice.textContent = totalPrice;
+    }
+
+    function closeModal() {
+        var modal = document.getElementById('orderModal');
+        modal.style.display = 'none';
+    }
+
+    function processPayment() {
+        // Implement your payment processing logic here
+        alert('Payment processed successfully!');
+        closeModal();
+    }
+</script>
 </body>
 </html>
